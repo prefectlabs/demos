@@ -1,0 +1,16 @@
+pull:
+  - prefect.deployments.steps.git_clone:
+      id: git_clone
+      repository: https://github.com/PrefectHQ/examples.git
+      directories: ['examples/01_getting_started']
+  - prefect.deployments.steps.set_working_directory:
+      directory: "{{ git_clone.directory }}/examples/01_getting_started"
+
+deployments:
+  - name: Hello, World!
+    description: A simple flow that prints "Hello, {name}!".
+    entrypoint: 01_hello_world.py:hello
+    tags:
+      - examples
+      - demos
+    schedule: null

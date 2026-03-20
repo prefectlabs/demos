@@ -1,0 +1,9 @@
+# Python resources
+.venv/
+venv/
+__pycache__
+*.pyc
+
+# Terraform resources
+terraform*
+.terraform*
