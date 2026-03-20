@@ -1,0 +1,17 @@
+pull:
+  - prefect.deployments.steps.git_clone:
+      id: git_clone
+      repository: https://github.com/prefectlabs/demos.git
+      directories: ['demos/artifacts']
+  - prefect.deployments.steps.set_working_directory:
+      directory: "{{ git_clone.directory }}/demos/artifacts"
+
+deployments:
+  - name: check-weather-hourly
+    entrypoint: weather.py:get_weather_for_address
+    tags:
+      - demos
+      - weather
+    schedule:
+      cron: "0 * * * *"
+      timezone: UTC
