@@ -1,0 +1,35 @@
+pull:
+  - prefect.deployments.steps.git_clone:
+      repository: https://github.com/PrefectHQ/examples.git
+      directories: ['flows']
+  - prefect.deployments.steps.set_working_directory:
+      directory: "{{ git_clone.directory }}/flows"
+definitions:
+  tags: &tags
+    - demos
+    - crypto_prices
+    - parameters
+deployments:
+  - name: bitcoin-price-hourly
+    entrypoint: schedule_specific_parameters.py:get_crypto_prices
+    tags: *tags
+    parameters:
+      currencies_to_check:
+        - bitcoin
+    schedule:
+      cron: "0 * * * *"
+      timezone: UTC
+    description: "Fetches and stores cryptocurrency prices every hour."
+  - name: crypto-prices-daily
+    entrypoint: schedule_specific_parameters.py:get_crypto_prices
+    tags: *tags
+    parameters:
+      currencies_to_check:
+        - bitcoin
+        - ethereum
+        - solana
+        - dogecoin
+    schedule:
+      cron: "0 12 * * *" # At noon UTC every day - grab before US market opens
+      timezone: UTC
+    description: "Fetches and stores a few cryptocurrency prices every day."
