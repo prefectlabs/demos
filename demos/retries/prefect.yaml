@@ -1,0 +1,13 @@
+pull:
+  - prefect.deployments.steps.git_clone:
+      id: git_clone
+      repository: https://github.com/PrefectHQ/examples.git
+      directories: ['examples/archive']
+  - prefect.deployments.steps.set_working_directory:
+      directory: "{{ git_clone.directory }}/examples/archive"
+
+deployments:
+  - name: retries
+    entrypoint: 04_retries.py:repo_info
+    schedule: null
+    
