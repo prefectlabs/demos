@@ -5,9 +5,7 @@ pull:
       directories: ['examples/archive']
   - prefect.deployments.steps.set_working_directory:
       directory: "{{ git_clone.directory }}/examples/archive"
-
 deployments:
   - name: retries
     entrypoint: 04_retries.py:repo_info
     schedule: null
-    
