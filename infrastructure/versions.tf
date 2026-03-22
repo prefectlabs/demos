@@ -6,5 +6,10 @@ terraform {
       source  = "prefecthq/prefect"
       version = ">= 2, <3"
     }
+
+    external = {
+      source  = "hashicorp/external"
+      version = "2.3.5"
+    }
   }
 }
