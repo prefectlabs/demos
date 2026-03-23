@@ -1,13 +1,16 @@
 variable "deploy_base_path" {
-  type = string
+  description = "Base path containing folders with prefect.yaml definitions to be deployed."
+  type        = string
 }
 
 variable "demo_exclude_patterns" {
-  type = list(string)
-  default = ["\\.venv"]
+  description = "Regex patterns used to exclude subdirectories from deployment discovery."
+  type        = list(string)
+  default     = ["\\.venv"]
 }
 
 variable "enable_parameter_schema_generation" {
-  type = bool
-  default = true
+  description = "Whether to dynamically generate deployment parameter OpenAPI schemas from flow entrypoints."
+  type        = bool
+  default     = true
 }

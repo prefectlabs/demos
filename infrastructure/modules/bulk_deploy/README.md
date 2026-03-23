@@ -80,9 +80,9 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_deploy_base_path"></a> [deploy\_base\_path](#input\_deploy\_base\_path) | n/a | `string` | n/a | yes |
-| <a name="input_demo_exclude_patterns"></a> [demo\_exclude\_patterns](#input\_demo\_exclude\_patterns) | n/a | `list(string)` | <pre>[<br/>  "\\.venv"<br/>]</pre> | no |
-| <a name="input_enable_parameter_schema_generation"></a> [enable\_parameter\_schema\_generation](#input\_enable\_parameter\_schema\_generation) | n/a | `bool` | `true` | no |
+| <a name="input_deploy_base_path"></a> [deploy\_base\_path](#input\_deploy\_base\_path) | Base path containing folders with prefect.yaml definitions to be deployed. | `string` | n/a | yes |
+| <a name="input_demo_exclude_patterns"></a> [demo\_exclude\_patterns](#input\_demo\_exclude\_patterns) | Regex patterns used to exclude subdirectories from deployment discovery. | `list(string)` | <pre>[<br/>  "\\.venv"<br/>]</pre> | no |
+| <a name="input_enable_parameter_schema_generation"></a> [enable\_parameter\_schema\_generation](#input\_enable\_parameter\_schema\_generation) | Whether to dynamically generate deployment parameter OpenAPI schemas from flow entrypoints. | `bool` | `true` | no |
 
 ## Outputs
 

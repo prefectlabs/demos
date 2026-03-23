@@ -42,8 +42,8 @@ data "external" "schema" {
   program = ["uv", "run", "${path.module}/scripts/schema_generator.py"]
 
   query = {
-    entrypoint                          = each.value.deployment.entrypoint
-    folder                              = join("/", [var.deploy_base_path, each.value.folder_name])
+    entrypoint = each.value.deployment.entrypoint
+    folder     = join("/", [var.deploy_base_path, each.value.folder_name])
   }
 }
 
