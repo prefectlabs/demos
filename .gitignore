@@ -7,3 +7,4 @@ __pycache__
 # Terraform resources
 terraform*
 .terraform*
+!.terraform-docs.yaml

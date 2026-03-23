@@ -1,6 +1,6 @@
 locals {
   demo_folders = [
-    for item in fileset(var.deploy_base_path, "*/prefect.yaml") :
+    for item in fileset(var.deploy_base_path, "**/prefect.yaml") :
     dirname(item)
     if !anytrue([for pattern in var.demo_exclude_patterns : can(regex(pattern, dirname(item)))])
   ]
@@ -27,29 +27,32 @@ locals {
   ]...)
 }
 
-resource "prefect_flow" "flows" {
+resource "prefect_flow" "this" {
   for_each = toset([for d in local.deployments : d.flow_name])
   name     = each.key
 }
 
 # ─── Parameter schema generation ────────────────────────────────────────────
 data "external" "schema" {
-  for_each = local.deployments
+  for_each = {
+    for k, v in local.deployments : k => v
+    if var.enable_parameter_schema_generation
+  }
 
-  program = ["uv", "run", "scripts/schema_generator.py"]
+  program = ["uv", "run", "${path.module}/scripts/schema_generator.py"]
 
   query = {
-    entrypoint = each.value.deployment.entrypoint
-    folder     = join("/", [var.deploy_base_path, each.value.folder_name])
+    entrypoint                          = each.value.deployment.entrypoint
+    folder                              = join("/", [var.deploy_base_path, each.value.folder_name])
   }
 }
 
 # ─── Deployment resources ───────────────────────────────────────────────────
-resource "prefect_deployment" "demo" {
+resource "prefect_deployment" "this" {
   for_each = local.deployments
 
   name       = each.value.deployment.name
-  flow_id    = prefect_flow.flows[each.value.flow_name].id
+  flow_id    = prefect_flow.this[each.value.flow_name].id
   entrypoint = each.value.deployment.entrypoint
 
   work_pool_name  = each.value.work_pool_name
@@ -57,14 +60,14 @@ resource "prefect_deployment" "demo" {
   tags            = each.value.tags
 
   parameters               = jsonencode(try(each.value.deployment.parameters, {}))
-  parameter_openapi_schema = data.external.schema[each.key].result.schema
+  parameter_openapi_schema = var.enable_parameter_schema_generation ? data.external.schema[each.key].result.schema : null
 
   description = try(each.value.deployment.description, null)
   version     = try(each.value.deployment.version, null)
 }
 
 # ─── Deployment schedules ───────────────────────────────────────────────────
-resource "prefect_deployment_schedule" "demo" {
+resource "prefect_deployment_schedule" "this" {
   for_each = merge([
     for key, d in local.deployments : {
       for idx, sched in d.schedules :
@@ -73,7 +76,7 @@ resource "prefect_deployment_schedule" "demo" {
     }
   ]...)
 
-  deployment_id = prefect_deployment.demo[each.value.deployment_key].id
+  deployment_id = prefect_deployment.this[each.value.deployment_key].id
 
   active   = try(each.value.active, true)
   timezone = try(each.value.timezone, null)
@@ -90,7 +93,7 @@ resource "prefect_deployment_schedule" "demo" {
 # ─── Deployment triggers (automations) ──────────────────────────────────────
 # In prefect.yaml, `triggers` are syntactic sugar for automations whose
 # action is always "run-deployment" targeting the parent deployment.
-resource "prefect_automation" "demo" {
+resource "prefect_automation" "this" {
   for_each = merge([
     for key, d in local.deployments : {
       for idx, trig in d.triggers :
@@ -98,12 +101,12 @@ resource "prefect_automation" "demo" {
     }
   ]...)
 
-  name        = try(each.value.name, "${each.key}")
+  name        = try(each.value.name, each.key)
   description = try(each.value.description, null)
   enabled     = try(each.value.enabled, true)
 
   trigger = merge(
-      try(each.value.type, "event") == "event" ? {
+    try(each.value.type, "event") == "event" ? {
       event = {
         posture       = try(each.value.posture, "Reactive")
         match         = try(jsonencode(each.value.match), null)
@@ -116,7 +119,7 @@ resource "prefect_automation" "demo" {
       }
     } : {},
 
-      try(each.value.type, "") == "compound" ? {
+    try(each.value.type, "") == "compound" ? {
       compound = {
         require  = try(each.value.require, null)
         within   = try(each.value.within, null)
@@ -124,14 +127,14 @@ resource "prefect_automation" "demo" {
       }
     } : {},
 
-      try(each.value.type, "") == "sequence" ? {
+    try(each.value.type, "") == "sequence" ? {
       sequence = {
         within   = try(each.value.within, null)
         triggers = each.value.triggers
       }
     } : {},
 
-      try(each.value.type, "") == "metric" ? {
+    try(each.value.type, "") == "metric" ? {
       metric = {
         match     = try(jsonencode(each.value.match), null)
         metric    = try(jsonencode(each.value.metric), null)
@@ -145,7 +148,7 @@ resource "prefect_automation" "demo" {
     {
       type          = "run-deployment"
       source        = "selected"
-      deployment_id = prefect_deployment.demo[each.value.deployment_key].id
+      deployment_id = prefect_deployment.this[each.value.deployment_key].id
       parameters    = try(jsonencode(each.value.parameters), null)
     }
   ]
