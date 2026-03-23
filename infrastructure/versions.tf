@@ -4,7 +4,7 @@ terraform {
   required_providers {
     prefect = {
       source  = "prefecthq/prefect"
-      version = ">= 2, <3"
+      version = "3.0.0"
     }
 
     external = {
