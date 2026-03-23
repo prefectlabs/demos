@@ -10,7 +10,7 @@ Configure the [Prefect Terraform provider](https://registry.terraform.io/provide
 
 Set `deploy_base_path` to a directory whose subfolders contain `prefect.yaml` files.
 
-Parameter schemas are generated via `uv run scripts/schema_generator.py`; disable that with `enable_parameter_schema_generation` if you do not need OpenAPI schemas on deployments.
+Parameter schemas are generated via [`scripts/schema_generator.py`](scripts/schema_generator.py); disable this with `enable_parameter_schema_generation` if you do not need OpenAPI schemas on deployments.
 
 ```hcl
 terraform {
