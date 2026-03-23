@@ -1,0 +1,1 @@
+data "prefect_account" "this" {}
